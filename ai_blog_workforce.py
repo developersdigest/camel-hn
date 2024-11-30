@@ -44,19 +44,6 @@ if not openai_api_key:
 # Section 2: Define Scraper Agent
 # ----------------------------------
 
-def is_allowed(url: str, user_agent: str = "*") -> bool:
-    """Check if scraping the URL is allowed by robots.txt."""
-    try:
-        parsed_url = requests.utils.urlparse(url)
-        robots_url = f"{parsed_url.scheme}://{parsed_url.netloc}/robots.txt"
-        rp = RobotFileParser()
-        rp.set_url(robots_url)
-        rp.read()
-        return rp.can_fetch(user_agent, url)
-    except Exception as e:
-        print(f"[Scraper Agent] Warning: Could not parse robots.txt for {url}. Assuming allowed.")
-        return True  # If robots.txt can't be fetched, assume allowed
-
 def is_ai_related(title: str) -> bool:
     """Determines if a story title is related to AI/LLM/ML based on keywords."""
     ai_keywords = ['AI', 'Artificial Intelligence', 'ML', 'Machine Learning', 'LLM', 'Deep Learning', 'Neural Network']
