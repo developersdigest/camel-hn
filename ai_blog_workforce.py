@@ -197,12 +197,13 @@ scraper_agent = ChatAgent(
 # Section 3: Define Writer Agent
 # ----------------------------------
 
-def write_markdown(stories_json: str, output_file: str = "hackernews_summary.md") -> str:
+import datetime
+
+def write_markdown(stories_json: str) -> str:
     """Writes the scraped stories to a markdown file.
     
     Args:
         stories_json (str): JSON string containing stories to write
-        output_file (str): Path to output markdown file
         
     Returns:
         str: Success or error message
@@ -226,6 +227,10 @@ def write_markdown(stories_json: str, output_file: str = "hackernews_summary.md"
             markdown_content += f"- **URL:** [{story['url']}]({story['url']})\n"
             markdown_content += f"- **Points:** {story['points']} points\n\n"
             print(f"   6.{idx}. Written story {idx} to markdown.")
+
+        # Generate timestamp for the output file
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = f"blog-posts/{timestamp}_hackernews_summary.md"
 
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(markdown_content)
