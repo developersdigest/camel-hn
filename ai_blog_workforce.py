@@ -44,14 +44,51 @@ if not openai_api_key:
 # Section 2: Define Scraper Agent
 # ----------------------------------
 
+
 def is_ai_related(title: str) -> bool:
-    """Determines if a story title is related to AI/LLM/ML based on keywords."""
-    ai_keywords = ['AI', 'Artificial Intelligence', 'ML', 'Machine Learning', 'LLM', 'Deep Learning', 'Neural Network']
-    title_lower = title.lower()
-    for keyword in ai_keywords:
-        if keyword.lower() in title_lower:
+    """
+    Determines if a story title is related to AI/LLM/ML by using GPT-4O model from OpenAI to interpret the context of the title.
+    
+    Args:
+        title (str): The title of the Hacker News story.
+        
+    Returns:
+        bool: True if the title is related to AI/LLM/ML, False otherwise.
+    """
+    print("[AI Analysis] Analyzing title for AI relevance...")
+    prompt = f"Is the following title related to AI, machine learning, or deep learning? Title: '{title}'"
+    
+    # Set up the request body for OpenAI API
+    body = {
+        "model": "gpt-4o",
+        "messages": [{"role": "system", "content": "Determine if the title is related to AI, machine learning, or deep learning."},
+                     {"role": "user", "content": prompt}]
+    }
+    
+    # Send a POST request to the OpenAI API
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+                "Content-Type": "application/json"
+            },
+            json=body
+        )
+        response.raise_for_status()  # This will raise an exception for HTTP errors
+        ai_response = response.json()['choices'][0]['message']['content'].lower()
+        
+        # Interpret the AI's response
+        if "yes" in ai_response or "related" in ai_response:
+            print(f"[AI Analysis] Title '{title}' is AI-related.")
             return True
-    return False
+        else:
+            print(f"[AI Analysis] Title '{title}' is not AI-related.")
+            return False
+
+    except Exception as e:
+        print(f"[AI Analysis] Error during API call: {e}")
+        return False  # Assume not related if there's an error
 
 def scrape_hackernews() -> str:
     """Scrapes the top stories from Hacker News, filters AI/LLM/ML related stories, and returns them in JSON format.
